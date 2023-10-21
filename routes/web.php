@@ -14,15 +14,20 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+  return view('welcome');
+});
+
+// neo4j
+Route::get('/neo4j', function () {
+  return Neo4j::run('MATCH (n) RETURN n LIMIT 5');
 });
 
 Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
+  'auth:sanctum',
+  config('jetstream.auth_session'),
+  'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+  Route::get('/dashboard', function () {
+    return view('dashboard');
+  })->name('dashboard');
 });
