@@ -173,6 +173,7 @@ return [
         App\Providers\VoltServiceProvider::class,
         App\Providers\FortifyServiceProvider::class,
         App\Providers\JetstreamServiceProvider::class,
+        App\Providers\Neo4jServiceProvider::class,
     ])->toArray(),
 
     /*

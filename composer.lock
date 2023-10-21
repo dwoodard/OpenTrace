@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "554f93248902d53b6efcfbeb17f8451c",
+    "content-hash": "7501412441061f709cd28a07c4745493",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4131,6 +4131,71 @@
                 }
             ],
             "time": "2022-04-21T12:23:20+00:00"
+        },
+        {
+            "name": "stefanak-michal/bolt",
+            "version": "v6.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/neo4j-php/Bolt.git",
+                "reference": "774bc9ac3f32489cd910fd88c5c227d64b2d6f2e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/neo4j-php/Bolt/zipball/774bc9ac3f32489cd910fd88c5c227d64b2d6f2e",
+                "reference": "774bc9ac3f32489cd910fd88c5c227d64b2d6f2e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^8"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9"
+            },
+            "suggest": {
+                "ext-openssl": "Needed when using StreamSocket connection class with SSL",
+                "ext-sockets": "Needed when using Socket connection class",
+                "laudis/neo4j-php-client": "Neo4j-PHP-Client is the most advanced PHP Client for Neo4j",
+                "stefanak-michal/neo4j-bolt-wrapper": "Wrapper for Neo4j PHP Bolt library to simplify usage."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Bolt\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michal Stefanak",
+                    "homepage": "https://www.linkedin.com/in/michalstefanak/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP library for communication with Neo4j graph database over TCP socket with Bolt protocol specification",
+            "homepage": "https://github.com/neo4j-php/Bolt",
+            "keywords": [
+                "Socket",
+                "bolt",
+                "database",
+                "neo4j"
+            ],
+            "support": {
+                "docs": "https://www.neo4j.com/docs/bolt/current/",
+                "issues": "https://github.com/neo4j-php/Bolt/issues",
+                "source": "https://github.com/neo4j-php/Bolt"
+            },
+            "funding": [
+                {
+                    "url": "https://ko-fi.com/michalstefanak",
+                    "type": "ko-fi"
+                }
+            ],
+            "time": "2023-10-18T14:23:57+00:00"
         },
         {
             "name": "symfony/console",

@@ -16,6 +16,7 @@
         "livewire/livewire": "^3.0",
         "livewire/volt": "^1.3",
         "muhammadhuzaifa/telescope-guzzle-watcher": "^2.0",
+        "stefanak-michal/bolt": "^6.1",
         "venturecraft/revisionable": "^1.40"
     },
     "require-dev": {
