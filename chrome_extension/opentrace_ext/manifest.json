@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json.schemastore.org/chrome-manifest",
+  "manifest_version": 3,
+  "name": "My Extension",
+  "description": " OpenTrace gathers data from the page it is on to be used for contact tracing ",
+  "version": "0.0.1",
+
+  "icons": {
+    "16": "icons/get_started16.png",
+    "32": "icons/get_started32.png",
+    "48": "icons/get_started48.png",
+    "128": "icons/get_started128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
