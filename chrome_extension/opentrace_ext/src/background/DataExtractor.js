@@ -10,6 +10,7 @@ class DataExtractor {
   constructor() {
 
     //using window loop through all the elements in the page and extract the data
+    
 
     this.data = {
       emails: [],
