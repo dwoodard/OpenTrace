@@ -1,8 +1,8 @@
 <template>
-<div class="flex flex-col w-[500px] bg-red-500 p-10" >
+<div class="flex w-64" >
 
-  <h1 class="" >
-   OpenTrace
+  <h1 >
+   OpenTrace Options
   </h1>  
 
   <div> {{msg }} </div>
@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
- const msg = 'Hello Popup'
+ const msg = 'Hello Options'
 </script>
 
 <style scoped>
