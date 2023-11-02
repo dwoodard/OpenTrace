@@ -1,16 +1,12 @@
 // data extractor will look at current tab and extract all data sets from it based on the rules
 // create the structure needed for this layout
 
-
-// this file is handed the current tab/page 
-
-// looking via body/content of the page  and document/object model
-
 class DataExtractor {
+
   constructor() {
 
     //using window loop through all the elements in the page and extract the data
-    
+
 
     this.data = {
       emails: [],
@@ -54,7 +50,10 @@ class DataExtractor {
 
   extractEmails() {
     // using regex to extract emails
-
+    return
 
   }
+
+}
+
 

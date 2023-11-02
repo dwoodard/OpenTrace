@@ -1,5 +1,5 @@
 <template>
-<div class="flex flex-col w-[500px] bg-red-500 p-10" >
+<div class="flex flex-col w-[500px] bg-blue-500 p-10" >
 
   <h1 class="" >
    OpenTrace

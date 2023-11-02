@@ -1,22 +1,31 @@
 import { defineManifest } from '@crxjs/vite-plugin'
 
-export default defineManifest(async (env) => {
+export default defineManifest(async (command, mode) => {
+
   return {
 
     manifest_version: 3,
     name: "OpenTrace Extension",
-    version: "1.0.1",
+    version: "0.0.1",
 
     // chrome_url_overrides: {
     //   newtab: "index.html"
     // },
 
-
-
-    background: {
-      "service_worker": "src/background/index.js",
-      "type": "module"
+    icons: {
+      "16": "icons/icon.png",
+      "48": "icons/icon.png",
+      "128": "icons/icon.png"
     },
+
+    // background: {
+    //   "service_worker": "src/background/index.js",
+    //   "type": "module"
+    // },
+
+    permissions: [
+      "activeTab"
+    ],
 
     options_ui: {
       page: "options/index.html",
@@ -30,9 +39,9 @@ export default defineManifest(async (env) => {
     content_scripts: [
       {
         matches: ["<all_urls>"],
-        js: ["src/background/index.js"],
-        run_at: "document_end",
+        js: ["src/content/index.js"]
       }
     ]
+
   }
 })
