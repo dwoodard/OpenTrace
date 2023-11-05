@@ -19,18 +19,16 @@ export default defineManifest(async (command, mode) => {
     },
 
     // background: {
-    //   "service_worker": "src/background/index.js",
-    //   "type": "module"
+    //   service_worker: "src/background.js",
+    //   type: "module"
     // },
 
     permissions: [
-      "activeTab"
+      "activeTab",
+      "tabs"
     ],
 
-    options_ui: {
-      page: "options/index.html",
-      open_in_tab: false
-    },
+    options_page: "options.html",
 
     action: {
       default_popup: "popup.html",

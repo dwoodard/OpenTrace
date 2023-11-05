@@ -6,6 +6,11 @@ import manifest from './manifest.config'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  },
   plugins: [
     vue(),
     crx({ manifest })
