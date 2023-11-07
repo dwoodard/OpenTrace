@@ -5,10 +5,14 @@ console.log('content.js loaded');
 
 console.log(window.location.href);
 
+// if popup is toggled on, then start the data extractor
+
 
 const dataExtractor = new DataExtractor();
-console.log('dataExtractor', dataExtractor.data);
+// console.log('dataExtractor', dataExtractor.data);
 
+//expose dataExtractor to the window
+window.opentrace = dataExtractor
 
 // Send a message to the background page with the extracted email addresses
 // chrome.runtime.sendMessage(data, (response) => {
