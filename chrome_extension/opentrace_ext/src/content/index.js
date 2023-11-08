@@ -1,4 +1,4 @@
-import DataExtractor from '@/content/DataExtractor';
+import DataExtractor from '@/content/DataExtractor'; // ./src/content/DataExtractor.js
 
 console.log('content.js loaded');
 

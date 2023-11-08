@@ -1,10 +1,5 @@
 import areacodes from '@/json/areacodes.json';
-
-/* 
-  example of what dataExtractor should look like:
-  let dataExtractor = new DataExtractor(data);
-  dataExtractor.data  // this is what we want to return 
-*/
+import ElementCount from './ElementCount.js';
 
 class DataExtractor {
 
@@ -35,21 +30,20 @@ class DataExtractor {
       external: new Set(),
       other: new Set(),
     }
-
   };
 
   constructor() {
     // console.log('DataExtractor constructor');
     this.init(); // this is the main function that runs when the class is instantiated
-    this.observe(); // this is the observer that listens for changes to the DOM
+    this.observer(); // this is the observer that listens for changes to the DOM
     this.listenForXHR(); // this is the listener that listens for XHR requests
+
+    this.watchElementCount(); // this is the watcher that watches for the element with the most growth
   }
 
   init() {
     // console.log('DataExtractor init'); 
     this.data.domain = JSON.parse(JSON.stringify(window.location));
-    //get the query string
-    this.data.domain.query = this.data.domain.searchParams || "";
     this.data.timestamp = Date.now();
 
     this.extract()
@@ -85,10 +79,11 @@ class DataExtractor {
 
   }
 
-  observe() {
-    this.observe = new MutationObserver(this.runObserver.bind(this));
-    this.observe.observe(document.body, {
-      // attributes: true,
+  observer() {
+    let observe = new MutationObserver(this.runObserver.bind(this));
+
+    observe.observe(document.body, {
+      attributes: true,
       childList: true,
       subtree: true
     });
@@ -111,12 +106,14 @@ class DataExtractor {
   }
 
   runObserver(mutationsList, observer) {
-    // log the mutationsList
-    // console.log('mutationsList', mutationsList);
-    // console.log('runObserver', this);
+    // console.log('DataExtractor runObserver', mutationsList, observer);
+
     mutationsList.forEach(mutation => {
       this.extract(mutation.target);
     });
+
+    // console.log('data', this.data);
+
 
   }
 
@@ -125,6 +122,7 @@ class DataExtractor {
     this.extractPhoneNumbers(el);
     this.extractAddresses(el);
     this.extractLinks(el);
+    // this.extractUsernames(el);
   }
 
   extractEmails(el = document.body) {
@@ -134,9 +132,7 @@ class DataExtractor {
     const emailRegex = /[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/mig;
 
 
-    let emails = el.innerText.match(emailRegex) || [];
-    // console.log('emails', emails);
-
+    let emails = el.innerText?.match(emailRegex) || [];
 
     emails.forEach(email => {
       this.data.emails.add(email);
@@ -163,7 +159,7 @@ class DataExtractor {
     // [...document.body.querySelectorAll('[id*="phone"], [class*="phone"],')].map(i => i.innerText)
 
     // get all the phone numbers on the page
-    let extractedPhones = el.innerText.match(phoneRegex) || [];
+    let extractedPhones = el.innerText?.match(phoneRegex) || [];
 
     // console.log('extractedPhones', extractedPhones);
 
@@ -195,7 +191,9 @@ class DataExtractor {
 
   extractAddresses(el = document.body) {
     // console.log('DataExtractor extractAddresses');
+
   }
+
 
   extractLinks(el = document.body) {
     // Initialize the Sets if they haven't been already
@@ -233,49 +231,72 @@ class DataExtractor {
       });
   }
 
+  extractUsernames(el = document.body) {
+    console.log('DataExtractor extractUsernames');
+
+
+
+
+    // twitter.com/username
+    // facebook.com/username
+    // instagram.com/username
+    // github.com/username
+    // linkedin.com/in/username
+
+
+    // youtube.com/username
+    // pinterest.com/username
+    // soundcloud.com/username
+    // vimeo.com/username
+    // flickr.com/username
+    // reddit.com/username
+    // tumblr.com/username
+    // medium.com/username
+    // quora.com/username
+    // etsy.com/username
+    // meetup.com/username
+    // snapchat.com/username
+    // whatsapp.com/username
+    // telegram.com/username
+    // vk.com/username
+    // slack.com/username
+    // discord.com/username
+    // twitch.com/username
+    // tiktok.com/username
+    // snapchat.com/username
+
+    // this function should extract usernames from the page
+    // and add them to the usernames Set
+    // this.data.usernames.add(username);
+
+    // some areas to look for usernames
+    // - document.body.querySelectorAll('[class*="username"]') // just the elements with a class that contains the word username
+    // - document.body.querySelectorAll('[class*="social"]') // just the elements with a class that contains the word social
+
+
+
+  }
+
+
+  watchElementCount() {
+    const elementCount = new ElementCount();
+    elementCount.start();
+
+    setInterval(() => {
+      const elementWithMaxGrowth = elementCount.getElementWithMaxGrowth();
+      if (elementWithMaxGrowth) {
+
+        // return null if the element is the body
+        if (elementWithMaxGrowth === document.body) {
+          return null;
+        }
+
+        console.log('elementCount', elementCount.getElementWithMaxGrowth(), 'count', elementCount.maxGrowth); ');
+
+      }
+    }, 500);
+  }
 
 }
 
 export default DataExtractor;
-/* 
-------------------------------------------------------------------------
-
-
-// step 1: set patterns to match
-// Regular expression to match email addresses
-const phoneRegex = /(\d{3})[-. ]?(\d{3})[-. ]?(\d{4})/g; //example: 801-776-0476
-
-
-// step 2: add all items to a set to remove duplicates
-let extractedEmails = [...new Set(document.body.textContent.match(emailRegex) || [])];
-let extractedPhones = [...new Set(document.body.textContent.match(phoneRegex) || [])];
-
-// step 3: Normalize and filter the data
-// lets normalize the phone numbers so we can compare them to the areacodes
-extractedPhones = extractedPhones.map(phone => {
-  phone = phone.replace(/\D/g, '');
-  if (phone.length === 11 && phone[0] === '1') {
-    phone = phone.substring(1);
-  }
-  return phone;
-});
-
-extractedPhones = [...new Set(extractedPhones)];
-
-// lets compare the phone numbers to the areacodes
-extractedPhones = extractedPhones.filter(phone => {
-  let areaCode = phone.substring(0, 3);
-  return Object.values(areacodes).some(i => i.includes(areaCode));
-});
-
-// normalize the phone numbers back to the original format
-extractedPhones = extractedPhones.map(phone => {
-  phone = phone.replace(/\D/g, '');
-  if (phone.length === 11 && phone[0] === '1') {
-    phone = phone.substring(1);
-  }
-  phone = phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-  return phone;
-});
-
-*/
