@@ -1,6 +1,15 @@
 <template>
-  <div class="flex flex-col w-[500px] bg-blue-500 p-10">
+  <div class="flex flex-col w-[500px] bg-red-500 p-10">
     <h1>OpenTrace</h1>
+
+    <!-- 
+      create a toggle button to turn on/off the extension
+      
+      show a message if the extension is turned off
+     -->
+    <button class="bg-blue-500 text-white p-2 rounded-md" @click="toggleExtension">
+      {{ message }} {{ counter }}
+    </button>
      
     <div v-if="emails.length">
       <h2>Emails Found ({{ emails.length }}):</h2>
@@ -24,45 +33,30 @@
     data(){
       return{
         emails: [],
-        phones: []
+        phones: [],
+        counter: 0,
+      }
+    },
+
+    methods: {
+      toggleExtension(){
+        counter++;
+
+        //send message to content script
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+          chrome.tabs.sendMessage(tabs[0].id, {message: "toggleExtension"}, (response) => {
+            console.log('response', response.message);
+          });
+        }); 
       }
     },
       mounted(){
-
-        console.log('mounted');
-
-        //add listener for messages from content script
-        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-          console.log('request', request);
-          console.log('sender', sender);
-          console.log('sendResponse', sendResponse);
-
-          this.emails = request.emails;
-          this.phones = request.phones;
-
-          // send message to popup
-          chrome.runtime.sendMessage(request, (response) => {
-          console.log('response', response.message);
-          });
-        });
-
-        
-
-
-        // chrome.action.setBadgeText({
-        //   text: getTabBadge(tabId),
-        //   tabId: getTabId(),
-        // });
-
-
-
-
-
+         console.log('mounted');
     }
   }
   </script>
   
   <style scoped>
-  /* Add any necessary styles here */
+  
   </style>
   
