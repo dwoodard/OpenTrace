@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "uuidv4": "^6.2.13",
-    "vue": "^3.3.4"
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.19",
