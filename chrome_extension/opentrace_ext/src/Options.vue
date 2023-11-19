@@ -1,22 +1,27 @@
 <template>
 <div>
-  <div class="bg-blue-500 text-white p-3">
-    OpenTrace Options
+  <div class="bg-blue-500 text-white p-3 flex justify-between">
+    <div>
+      OpenTrace Options  
+    </div>
+
+    <button class="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-700" @click="toggleExtension">
+        {{ isExtEnabled ? 'Turn Off' : 'Turn On' }}
+      </button>
   </div>
   <!-- 
     make a thin line to show if it is on (green) or off (red)
    -->
 
   <div :class="{
-    'bg-green-500': isExtActive,
-    'bg-red-500': !isExtActive 
-   }" class="px-3">
-    <div>OpenTrace is {{ isExtActive ? 'on' : 'off' }}</div>
+    'bg-green-500': isExtEnabled,
+    'bg-red-500': !isExtEnabled 
+   }" class="flex justify-between px-3 py-2">
+    
     <div>
-      <button class="bg-blue-500 text-white p-2 rounded-md" @click="toggleExtension">
-        {{ isExtActive ? 'Turn Off' : 'Turn On' }}
-      </button>
+      OpenTrace is {{ isExtEnabled ? 'on' : 'off' }}
     </div>
+     
   </div>
 
 
@@ -51,22 +56,27 @@
 export default{
   data(){
     return{
-      isExtActive: true,
+      isExtEnabled: true,
     }
   },
 
   methods: {
     toggleExtension(){
-      //send message to content script
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {message: "toggleExtension"}, (response) => {
-          console.log('response', response.message);
-        });
-      }); 
+      //toggle the isExtEnabled value and set it in storage
+      this.isExtEnabled = !this.isExtEnabled;
+      
+      chrome.storage.sync.set({isExtEnabled: this.isExtEnabled});
+      console.log('isExtEnabled', chrome.storage.sync.get(['isExtEnabled']));
     }
   },
     mounted(){
        console.log('mounted');
+
+         
+        chrome.storage.sync.get(['isExtEnabled'], (result) => {
+          console.log('Value currently is ' + result.isExtEnabled);
+          this.isExtEnabled = !!result.isExtEnabled;
+        });
   }
 }
 

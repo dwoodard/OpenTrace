@@ -25,7 +25,9 @@ export default defineManifest(async (command, mode) => {
 
     permissions: [
       "activeTab",
-      "tabs"
+      "tabs",
+      "storage",
+      "scripting"
     ],
 
     options_page: "options.html",
