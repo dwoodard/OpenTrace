@@ -11,10 +11,7 @@ chrome.storage.sync.get(['isExtEnabled']).then((data) => {
     const openTrace = new OpenTrace();
     console.log(openTrace.data);
     console.log('json', openTrace.toJSON());
-
   }
-
-
 
 });
 

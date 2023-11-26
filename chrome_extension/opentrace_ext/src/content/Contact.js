@@ -4,8 +4,7 @@ import { v4 as uuid } from 'uuid';
 class Contact {
   constructor(name = '') {
 
-    // console.log(uuid());
-
+    // console.log(uuid()); 
 
     this.id = uuid();
     this.name = name;
