@@ -4,7 +4,7 @@ import Settings from '@/options/pages/settings.vue';
 
 const routes = [
   { path: '/', component: null },
-  { path: '/options.html', component: null },
+  { path: '/options.html', component: Timeline },
 
   { path: '/timeline', component: Timeline },
   { path: '/timeline', component: Timeline },

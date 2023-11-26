@@ -1,261 +1,220 @@
-// Contact
 import Contact from './Contact.js';
-
-// Patterns to look for in the DOM
-import areacodes from '@/json/areacodes.json';
-// import social from './Social.js';
-// import DomTools from './DomTools.js';
+import areacodes from '../data/areacodes.js'; // Assuming this is a list of valid area codes
 
 class OpenTrace {
-
-  data = {
-
-    domain: {
-      host: '',
-      path: '',
-      fullurl: '',
-    },
-
-    contacts: new Set(),
-
-
-
-    // unique identifiers
-    emails: new Set(),
-    phoneNumbers: new Set(),
-
-    // common data
-    names: new Set(),
-    people: new Set(),
-    addresses: new Set(),
-
-    // social data
-    usernames: new Set(), // twitter, facebook, instagram, github, linkedin, etc
-
-    // Page data
-    links: {
-      internal: new Set(),
-      external: new Set(),
-      other: new Set(),
-    }
-  };
-
   constructor() {
-    console.log('Contact', new Contact());
-    console.log('Contact', new Contact());
+    this.data = {
+      domain: JSON.parse(JSON.stringify(window.location)),
+      timestamp: Date.now(),
+      contacts: new Map() // Stores contacts by unique identifier or ancestor
+    };
 
-
-    // console.log('OpenTrace constructor');
-    this.analyzePage(); // this is the main function that runs when the class is instantiated
-    this.observer(); // this is the observer that listens for changes to the DOM
-
+    this.analyzePage();
+    this.listenObserver();
   }
 
   analyzePage() {
-    // Logic to analyze the entire page
-    this.data.domain = JSON.parse(JSON.stringify(window.location));
-    this.data.timestamp = Date.now();
-    this.data.depthMap = this.groupElementsByDepth()
-
-
-
-
-    this.traverseDOM(document.body);
-
+    let nodes = this.extractData(document.body);
+    // log out those nodes here
+    console.log('============================');
+    console.log('nodes', nodes);
+    console.log('============================');
+    this.groupDataByAncestors(nodes);
   }
 
-  // Traverses the DOM to find and extract data
-  traverseDOM(node) {
-    // Extract data from the current node
-    this.extract(node)
-
-    // Recursively analyze child nodes
-    node.childNodes.forEach(child => {
-      if (child.nodeType === Node.ELEMENT_NODE) {
-        this.traverseDOM(child);
-      }
+  listenObserver() {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        // Process each added node if any
+        mutation.addedNodes.forEach(addedNode => {
+          if (addedNode.nodeType === Node.ELEMENT_NODE) {
+            let nodes = this.extractData(addedNode);
+            this.groupDataByAncestors(nodes);
+          }
+        });
+      });
     });
-  }
 
-  observer() {
-    let observe = new MutationObserver(this.runObserver.bind(this));
-
-    observe.observe(document.body, {
-      attributes: false,
+    const observerConfig = {
       childList: true,
       subtree: true
-    });
+    };
+
+    observer.observe(document.body, observerConfig);
   }
 
-  runObserver(mutationsList, observer) {
-    // console.log('runObserver', mutationsList, observer); 
-    mutationsList.forEach(mutation => {
-      console.log('mutation', mutation);
-      this.traverseDOM(mutation.target);
-    });
+  extractData(node) {
+    let dataNodes = [];
+    this.traverseDOM(node, dataNodes);
+    // console.log("Extracted data nodes:", dataNodes);
 
-    // console.log('data', this.data);
+    return dataNodes;
   }
 
-  extract(el = document.body) {
-    this.extractEmails(el);
-    this.extractPhoneNumbers(el);
-    this.extractAddresses(el);
-    this.extractLinks(el);
-
-  }
-
-  extractEmails(el = document.body) {
-    // foo@bar.com
-    // foo at bar dot com
-
-    const emailRegex = /[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}/mig;
+  traverseDOM(node, dataNodes) {
 
 
-    let emails = el.innerText?.match(emailRegex) || [];
+    // console.log("Traversing Node:", node);
 
-    emails.forEach(email => {
-      this.data.emails.add(email);
+    this.processNode(node, dataNodes);
+    node.childNodes.forEach(childNode => {
+      this.traverseDOM(childNode, dataNodes);
     });
 
   }
+  processNode(node, dataNodes) {
 
-  extractPhoneNumbers(el = document.body) {
-    // console.log('OpenTrace extractPhoneNumbers');
 
-    // (801) 776-0476
-    // 801-776-0476
-    // 801.776.0476
-    // 801 776 0476
-    // 8017760476
-    // 1-801-776-0476
-    // 1.801.776.0476
-    // 1 801 776 0476
-    // 1 (801) 776-0476
-    // 1(801)776-0476 
-    // [435]851-6044
-    // 888444.4444 <--- this is not a phone number
+    if (node.nodeType === Node.TEXT_NODE) {
+      const textContent = node.nodeValue.trim();
+      const email = this.extractEmail(textContent);
+      const phone = this.extractPhone(textContent);
 
-    const phoneRegex = /(?:\b(?:\+?\d{1,3}[-.\s]?)?\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4}\b)|\[(\d{3})\](\d{3})[-.\s]?(\d{4}\b))/mig;
+      if (email) dataNodes.push({ type: 'email', content: email, node });
+      if (phone) dataNodes.push({ type: 'phone', content: phone, node });
+    }
+    else if (node.nodeName === 'A' && node.href) {
+      if (node.href.startsWith('mailto:')) {
+        const email = node.href.substring(7); // Extract email after 'mailto:'
+        dataNodes.push({ type: 'email', content: email, node });
+      }
+      else if (node.href.startsWith('tel:')) {
+        const phone = node.href.substring(4); // Extract phone after 'tel:'
+        dataNodes.push({ type: 'phone', content: this.normalizePhone(phone), node });
+      }
+    }
+  }
 
-    //check el if it is a style element, if so, skip it
-    if (el.tagName === 'STYLE') {
-      return;
+  groupDataByAncestors(nodes) {
+    nodes.forEach(({ node, content, type }) => {
+      const ancestor = this.findClosestCommonAncestor(node);
+
+      // log out the ancestor here
+      console.log('>>>>>>>>>------------------');
+      for (const el of ancestor.childNodes) {
+        console.log(el);
+      }
+      console.log('>>>>>>>>>------------------');
+
+      if (!ancestor) return;
+
+      // Get the contact for the ancestor
+      let contact = this.data.contacts.get(ancestor);
+
+
+      if (!contact) {
+        contact = new Contact();
+        // this sets the contact from the ancestor
+        this.data.contacts.set(ancestor, contact);
+      }
+      else {
+        console.log('contact', contact);
+      }
+
+      //  log out the contact here
+      console.log('------------------');
+      console.log(contact);
+      console.log('------------------');
+
+      // Add the extracted data to the contact
+      if (type === 'email') {
+        contact.addEmail(content);
+      }
+      else if (type === 'phone') {
+        contact.addPhoneNumber(content);
+      }
+    });
+  }
+
+  // Helper methods (extractEmail, extractPhone, etc.) remain the same
+  extractEmail(text) {
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
+    const match = emailRegex.exec(text);
+    return match ? match[0] : null;
+  }
+
+  extractPhone(text) {
+    const phoneRegex = /(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/;
+    const match = phoneRegex.exec(text);
+    return match ? this.normalizePhone(match[0]) : null;
+  }
+
+  normalizePhone(phone) {
+    let normalizedPhone = phone.replace(/\D/g, '');
+
+    // remove the leading 1 for US numbers if it exists
+    if (normalizedPhone.length === 11 && normalizedPhone.startsWith('1')) {
+      normalizedPhone = normalizedPhone.substring(1);
     }
 
+    // Validate the length of the phone number
+    if (normalizedPhone.length !== 10) {
+      return; // Skip this iteration if the phone number doesn't have 10 digits
+    }
 
-    // get all the phone numbers on the page
-    let extractedPhones = el.innerText?.match(phoneRegex) || [];
-
-    // console.log('extractedPhones', extractedPhones);
-
-    // Normalize and filter phone numbers
-    extractedPhones.forEach(phone => {
-      // remove all non-numeric characters
-      let normalizedPhone = phone.replace(/\D/g, '');
-
-      // remove the leading 1 for US numbers if it exists
-      if (normalizedPhone.length === 11 && normalizedPhone.startsWith('1')) {
-        normalizedPhone = normalizedPhone.substring(1);
-      }
-
-      // Validate the length of the phone number
-      if (normalizedPhone.length !== 10) {
-        return; // Skip this iteration if the phone number doesn't have 10 digits
-      }
-
-      // check the area code, if it's not in the areacodes list, then skip it
-      let areaCode = normalizedPhone.substring(0, 3);
-      if (!Object.values(areacodes).some(i => i.includes(areaCode))) {
-        return; // Skip this iteration as the area code is not valid
-      }
-
-      // Add the phone number to the set
-      this.data.phoneNumbers.add(normalizedPhone);
-
-    });
-  }
-
-  extractAddresses(el = document.body) {
-    // console.log('OpenTrace extractAddresses', el.outerText);
-
-    // look for addresses in the outerText of the element
-    // console.log(el.outerText);
-
-
+    return normalizedPhone;
 
   }
 
-  extractLinks(el = document.body) {
-    // Initialize the Sets if they haven't been already
-    this.data.links.internal = this.data.links.internal || new Set();
-    this.data.links.external = this.data.links.external || new Set();
-    this.data.links.other = this.data.links.other || new Set();
-
-    // Extract all hyperlinks from the element
-    [...el.querySelectorAll('a[href]')] // Select only <a> elements with href
-      .map(a => a.href.trim()) // Trim whitespace from each href
-      .filter(href => href) // Filter out empty strings
-      .forEach(href => {
-        try {
-          const link = new URL(href);
-
-          // Check if the link is neither HTTP nor HTTPS (e.g., mailto, tel, etc.)
-          if (link.protocol !== 'http:' && link.protocol !== 'https:') {
-            this.data.links.other.add(href);
-          } else {
-            // Prepare the main domain for comparison by stripping out 'www' and any subdomains
-            const baseDomain = this.data.domain.host;
-            const linkBaseDomain = link.host;
-
-            // Check if the link's base domain matches the data domain's base domain
-            if (linkBaseDomain === baseDomain) {
-              this.data.links.internal.add(href);
-            } else {
-              this.data.links.external.add(href);
-            }
-          }
-        } catch (error) {
-          // If there's an error in creating a new URL, it means the href was not a valid URL
-          console.error('Invalid URL:', href);
-        }
-      });
+  isAddress(address) {
+    const addressRegex = /(\d{1,5}\s)([A-Za-z\s]{1,})/; // Simple regex for address validation
+    return addressRegex.test(address);
   }
 
-  extractUsernames(link) {
-    // step 1. check if the link is a social link
-    // step 2. if it is a social link, extract the username from the link
-    // step 3. add the username to the usernames Set
+  findClosestCommonAncestor(node) {
+    let path = [];
+    let current = node;
 
-    this.data.usernames.add(social.findUsername(link));
+    while (current && current !== document.body) {
+      path.unshift(current);
+      current = current.parentElement;
+    }
 
+    if (path.length === 0) return null;
 
-
+    let ancestor = path[0];
+    for (const el of path) {
+      if (el.contains(ancestor)) ancestor = el;
+    }
+    return ancestor;
   }
 
+  findClosestCommonAncestor(nodes) {
+    let paths = nodes.map((node) => this.getAncestorPath(node));
+    let shortestPath = paths.reduce((a, b) => (a.length < b.length ? a : b));
 
-  groupElementsByDepth() {
-    const allElements = [...document.querySelectorAll('body *:not(script)')];
-    const depthMap = new Map();
-
-    allElements.forEach(element => {
-      let depth = 0;
-      let parent = element.parentNode;
-      while (parent && parent !== document) {
-        depth++;
-        parent = parent.parentNode;
+    for (let i = 0; i < shortestPath.length; i++) {
+      if (paths.every((path) => path[i] === shortestPath[i])) {
+        console.log(
+          `findClosestCommonAncestor: Common ancestor found at depth ${i}`
+        );
+        return shortestPath[i];
       }
+    }
 
-      if (!depthMap.has(depth)) {
-        depthMap.set(depth, []);
-      }
-
-      depthMap.get(depth).push(element);
-    });
-
-    return depthMap;
+    console.log("findClosestCommonAncestor: No common ancestor found");
+    return null;
   }
 
+
+
+
+
+
+
+
+
+
+  toJSON() {
+    return {
+      data: {
+        domain: this.data.domain,
+        timestamp: this.data.timestamp,
+        contacts: Array.from(this.data.contacts.values()).
+          map(contact => contact.toJSON())
+      }
+    }
+  }
 }
 
 export default OpenTrace;

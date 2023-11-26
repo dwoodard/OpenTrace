@@ -18,10 +18,11 @@ export default defineManifest(async (command, mode) => {
       "128": "icons/icon.png"
     },
 
-    // background: {
-    //   service_worker: "src/background.js",
-    //   type: "module"
-    // },
+
+    background: {
+      service_worker: "src/service-worker-loader.js"
+    },
+
 
     permissions: [
       "activeTab",

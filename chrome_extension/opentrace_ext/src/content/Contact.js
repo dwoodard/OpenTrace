@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 class Contact {
   constructor(name = '') {
 
-    console.log(uuid());
+    // console.log(uuid());
 
 
     this.id = uuid();
@@ -36,8 +36,23 @@ class Contact {
     this.associatedUrls.add(url);
   }
 
-  // You can add more methods here for additional functionality
-  // like removing data, updating data, or exporting data.
+  // Returns a string representation of the object
+  toString() {
+    return JSON.stringify(this.toJSON());
+  }
+
+  // Returns a JSON representation of the object
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      emails: Array.from(this.emails),
+      phoneNumbers: Array.from(this.phoneNumbers),
+      usernames: Array.from(this.usernames),
+      addresses: Array.from(this.addresses),
+      associatedUrls: Array.from(this.associatedUrls),
+    };
+  }
 }
 
 export default Contact;

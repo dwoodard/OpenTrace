@@ -1,15 +1,28 @@
-import OpenTrace from '@/content/OpenTrace'; // ./src/content/OpenTrace.js
+import OpenTrace from './OpenTrace'; // ./src/content/OpenTrace.js
 
 console.log('content init');
-console.log(window.location.href);
 
-//get isExtEnabled from storage
-chrome.storage.local.get('isExtEnabled', (result) => {
-  if (result.isExtEnabled) {
-    console.log('index.js', result.isExtEnabled);
+
+
+chrome.storage.sync.get(['isExtEnabled']).then((data) => {
+  console.log('isExtEnabled', data.isExtEnabled);
+
+  if (data.isExtEnabled) {
+    const openTrace = new OpenTrace();
+    console.log(openTrace.data);
+    console.log('json', openTrace.toJSON());
+
   }
+
+
+
 });
 
-const openTrace = new OpenTrace();
-console.log(openTrace.data);
+
+
+
+
+
+
+
 
